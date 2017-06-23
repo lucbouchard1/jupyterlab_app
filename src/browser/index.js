@@ -11,6 +11,7 @@ require('@jupyterlab/default-theme/style/index.css');
 // Use window.require to prevent webpack from expanding electron
 var ipcRenderer = window.require('electron').ipcRenderer;
 var app = require('@jupyterlab/application').JupyterLab;
+var ServerConnection = require('@jupyterlab/services').ServerConnection;
 
 function main() {
     var version = PageConfig.getOption('appVersion') || 'unknown';
@@ -46,15 +47,12 @@ function main() {
     } catch (e) {
         // No-op
     }
-    lab.start({ "ignorePlugins": ignorePlugins });
+
     ipcRenderer.on('server-data', (evt, arg) => {
-        /*var serverData = JSON.parse(String(arg));
-        var el = document.getElementById('jupyter-config-data');
-        var data = JSON.parse(el.innerText);
-        data.token = serverData.token;
-        el.innerText = JSON.stringify(data);
-        console.log(JSON.parse(el.innerText));*/
-        //lab.start({ "ignorePlugins": ignorePlugins });
+        var serverData = JSON.parse(String(arg));
+        console.log(serverData);
+        PageConfig.setOption('token', serverData.token);
+        lab.start({ "ignorePlugins": ignorePlugins });
     });
 
     ipcRenderer.send('server-data', 'get');

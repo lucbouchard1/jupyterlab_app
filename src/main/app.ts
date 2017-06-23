@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { dialog, app, BrowserWindow } from 'electron'
+import { dialog, app, BrowserWindow, ipcMain } from 'electron'
 import { ChildProcess, spawn } from 'child_process';
-import * as Handlebars from 'handlebars';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url'
 
@@ -103,20 +101,11 @@ export class JupyterApplication {
     private mainWindow: any;
 
     /**
-     * The file that stores index.html after it has been
-     * run through the templater. This is a hack that should
-     * be replaced when the JupyterLab application api is 
-     * updated.
-     */
-    private indexFile: string;
-
-    /**
      * Construct the Jupyter application
      */
     constructor() {
         this.registerListeners();
         this.server = new JupyterServer();
-        this.indexFile = path.join(__dirname, 'temp.index.html');
     }
 
     /**
@@ -142,7 +131,6 @@ export class JupyterApplication {
 
         app.on('quit', () => {
             this.server.stop();
-            fs.unlinkSync(this.indexFile);
         });
     }
 
@@ -159,7 +147,7 @@ export class JupyterApplication {
         });
 
         this.mainWindow.loadURL(url.format({
-            pathname: this.indexFile,
+            pathname: path.join(__dirname, '../browser/index.html'),
             protocol: 'file:',
             slashes: true
         }));
@@ -195,10 +183,9 @@ export class JupyterApplication {
         this.server.start(8888)
             .then((serverData) => {
                 console.log("Jupyter Server started at: " + serverData.url + "?token=" + serverData.token);
-                let source = fs.readFileSync(path.join(__dirname, '../browser/index.html')).toString();
-                let template = Handlebars.compile(source);
-                let html = template(serverData);
-                fs.writeFileSync(path.resolve(__dirname, this.indexFile), html);
+                ipcMain.on('server-data', (evt: any, arg: string) => {
+                    evt.sender.send('server-data', JSON.stringify(serverData));
+                });
                 this.createWindow();
             })
             .catch((err) => {
