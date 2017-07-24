@@ -99,11 +99,26 @@ class NativeMenu extends MenuBar implements IMainMenu {
             return;
         }
 
+        if (menu.title.label == 'Servers')
+            return;
+
+        let jMenu = this.buildNativeMenu(menu);
+
+        if (menu.title.label == 'File') {
+            let newItem: JupyterMenuItemOptions = {
+                type: 'normal',
+                label: 'New Window',
+                command: 'electron-jupyterlab:activate-server-manager',
+                args: null,
+            }
+            jMenu = [newItem].concat(jMenu);
+        }
+
         let rank = 'rank' in options ? options.rank : 100;
         let menuItem: JupyterMenuItemOptions = {
             rank: rank,
             label: menu.title.label,
-            submenu: this.buildNativeMenu(menu)
+            submenu: jMenu
         }
         /* Append the menu to the native menu */
         ipc.send(MenuIPC.REQUEST_MENU_ADD, menuItem);

@@ -25,7 +25,7 @@ class ServerManager extends React.Component<ServerManager.Props, ServerManager.S
         this.renderAddConnectionForm = this.renderAddConnectionForm.bind(this);
         this.addFormCancel = this.addFormCancel.bind(this);
         
-        this.state = {renderState: this.renderAddConnectionForm};
+        this.state = {renderState: this.renderServerManager};
     }
     
     private addFormCancel() {
