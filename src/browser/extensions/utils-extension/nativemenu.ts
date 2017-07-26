@@ -76,6 +76,10 @@ class NativeMenu extends MenuBar implements IMainMenu {
             nItems[i].command = items[i].command;
             nItems[i].args = items[i].args;
 
+            // Add 'role' option to electron menu item
+            if (items[i].args && items[i].args.role)
+                nItems[i].role = nItems[i].args.role;
+
             if (items[i].keyBinding !== null){
                 // Doesn't handle shortcuts made of multiple key codes
                 let keys = items[i].keyBinding.keys.join(",");
